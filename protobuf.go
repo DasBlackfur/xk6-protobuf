@@ -23,20 +23,22 @@ type ProtoFile struct {
 	messageDesc protoreflect.MessageDescriptor
 }
 
-func (p *Protobuf) Load(protoFilePath, lookupType string) ProtoFile {
+func (p *Protobuf) Load(protoFilePath string, importPaths []string, lookupType string) ProtoFile {
 	compiler := protocompile.Compiler{
-		Resolver: &protocompile.SourceResolver{},
+		Resolver: &protocompile.SourceResolver{
+			ImportPaths: importPaths,
+		},
 	}
 
 	files, err := compiler.Compile(context.Background(), protoFilePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	if files == nil {
-		log.Fatal("No files were passed as arguments")
+		log.Print("No files were passed as arguments")
 	}
 	if len(files) == 0 {
-		log.Fatal("Zero files were parsed")
+		log.Print("Zero files were parsed")
 	}
 
 	return ProtoFile{files[0].Messages().ByName(protoreflect.Name(lookupType))}
